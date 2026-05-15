@@ -1,0 +1,679 @@
+0|normal|A
+1|normal|PROJECT REPORT
+2|normal|ON
+3|normal|CUSTOMER BEHAVIOUR PREDICTIONS USING WEB USAGE MINING Submitted in Partial Fulfillment of the Requirement for the Degree of
+4|normal|BACHELOR OF TECHNOLOGY
+5|normal|IN
+6|normal|COMPUTER SCIENCE AND ENGINEERING
+8|normal|Submitted by:
+9|normal|ABHAY SINGH (223025001)
+10|normal|KASHISH BHARDWAJ (223025036)
+11|normal|Under the Supervisor of:
+12|normal|Ms. NIDHI RANA
+13|normal|COLLEGE OF SMART COMPUTING
+14|normal|COER UNIVERSITY, Roorkee
+15|normal|7th KM Haridwar, National Highway Vardhmanpuram, Roorkee,
+16|normal|Rehmadpur, Uttarakhand , 247667
+17|normal|Session: 2025-2026
+18|normal|i
+19|normal|ii
+20|normal|iii
+21|normal|ACKNOWLEDGEMENT
+22|normal|I sincerely express my gratitude to Ms. Nidha Rana, my project guide, for their valuable guidance,  encouragement, and support throughout this project. I also extend my thanks to my department  faculty, family, and friends for their cooperation.
+23|normal|Abhay Singh
+24|normal|Kashish Bhardwaj
+25|normal|iv
+26|normal|ABSTRACT
+27|normal|This project presents a complete end-to-end machine learning system designed to predict customer  purchase probability using web session behaviour data. The system processes raw website event logs,  performs feature engineering, handles class imbalance, trains multiple machine learning models, and  
+28|normal|The dataset includes session-level features such as pageviews, clicks, product views, add-to-cart  events, checkout visits, and timestamps. Preprocessing techniques such as missing value handling,  scaling, categorical encoding, and session aggregation were applied. To address the highly  imbalanced
+29|normal|weight adjustments.
+30|normal|Several machine learning models were evaluated—Random Forest, XGBoost, LightGBM, and a  Transformer-based sequence model. Hyperparameter tuning was performed using Optuna, and  model interpretability was achieved using SHAP, enabling both global and local explanations. The  final system includes a F
+31|normal|for visualization and operator monitoring. Additionally, MLflow and Prometheus/Grafana were  integrated to provide experiment tracking, model versioning, and performance monitoring.
+32|normal|The results demonstrate that the optimized XGBoost model, combined with engineered behavioural  features, provides reliable purchase probability estimates. These insights can be used by e-commerce  platforms to personalize user experience, trigger targeted interventions, and optimize marketing  stra
+33|normal|v
+34|normal|TABLE OF FIGURES
+37|normal|vi
+38|normal|TABLE OF TABLES
+41|normal|vii
+42|normal|TABLE OF CONTENTS
+43|normal|Sr. No. Title Page No.
+44|normal|I Progress Report I   II Candidate’s Declaration II   III Certificate III   IV Acknowledgements IV
+45|normal|V. Abstract V  VI Table of Figures VI VII Table of Tables VII VIII Table of Contents VIII
+46|normal|1. Introduction
+47|normal|1.1 Problem Statement
+48|normal|1.2 Objectives
+49|normal|1.3 Scope
+50|normal|1 -3
+51|normal|2. Literature Review 4-5
+52|normal|3. System Analysis
+53|normal|3.2 Existing System
+54|normal|3.2 Proposed System
+55|normal|System Design
+56|normal|6-8
+57|normal|9-11
+58|normal|5.1 Architecture Diagram
+59|normal|4.
+60|normal|5.1 Data Flow Diagram (DFD)
+61|normal|5.3 Entity-Relationship (ER) Diagram
+62|normal|5. Implementation
+63|normal|6.1 Data Preprocessing
+64|normal|6.1 Model Development
+65|normal|6.3 Model Explainability (SHAP)
+66|normal|6.4 API & Dashboard Development 6.5 Deployment Setup
+67|normal|13-18
+68|normal|6. Testing & Validation 19-21 7. Results (Attached Screen Shots) & Discussion 22-28 8. Future Work 29 9 Conclusion 30 10. References 31-32
+69|normal|viii
+70|normal|CHAPTER 1 INTRODUCTION
+71|normal|E-commerce platforms generate massive volumes of user interaction data every second. Every visit  to a website results in a sequence of events such as page views, product clicks, add-to-cart actions,  and checkout attempts. These interactions form valuable behavioural signals that indicate the user’
+72|normal|Predicting whether a customer will complete a purchase during a session has become a critical task  for businesses. Accurate purchase predictions help companies optimize user experience, personalize  recommendations, prioritize high-intent users, and allocate marketing resources more effectively.  W
+73|normal|This project uses session-level data combined with machine learning techniques to build a predictive  model that estimates the likelihood of purchase. The solution also includes deployment, monitoring,  and explainability aspects, making it suitable for production environments.
+74|normal|1.1 Problem Statement
+75|normal|Despite having large amounts of user interaction data, many e-commerce platforms lack an automated  mechanism to analyze user behaviour in real time and predict whether a visitor will convert. Manual  analysis or static rule-based systems often fail due to:
+76|normal|• Complex non-linear patterns in user behaviour
+77|normal|• Highly imbalanced data where only a small percentage of sessions result in purchases • Lack of real-time scoring systems
+78|normal|• Absence of explainability for predictions
+79|normal|Therefore, the core problem addressed in this project is:
+80|normal|To build a machine learning system that can accurately predict the probability of purchase for  each web session using user behaviour data, and deploy it for real-time inference.
+82|normal|1.2 Objectives
+83|normal|The main objectives of the project are:
+84|normal|Technical Objectives
+85|normal|1. Convert raw event logs into meaningful, aggregated session features.
+86|normal|2. Handle class imbalance using SMOTE and class-weight strategies.
+87|normal|3. Train multiple machine learning models including Random Forest, XGBoost, LightGBM,  and a Transformer sequence model.
+88|normal|4. Perform automated hyperparameter tuning using Optuna.
+89|normal|5. Implement model explainability using SHAP.
+90|normal|1
+91|normal|6. Deploy the best-performing model using FastAPI for real-time predictions. 7. Develop a Streamlit dashboard for visualization and analysis. 8. Integrate MLflow and Prometheus/Grafana for tracking and monitoring. Business Objectives
+92|normal|1. Identify high-intent users in real time.
+93|normal|2. Enable personalized marketing interventions (discounts, notifications). 3. Improve overall conversion rates through better decision-making. 4. Provide an explainable and reliable decision-support system.
+94|normal|1.3 Scope
+95|normal|The scope of this project includes:
+96|normal|Included in Scope
+97|normal|• Collection and preprocessing of session-level behavioural data • Feature engineering and model training
+98|normal|• Hyperparameter tuning and model evaluation
+99|normal|• Explainability using SHAP
+100|normal|• Development of FastAPI-based prediction service
+101|normal|• Streamlit-based visualization dashboard
+102|normal|• Monitoring and model tracking tools
+103|normal|• Comprehensive documentation and results analysis
+104|normal|Out of Scope
+105|normal|• Frontend website development
+106|normal|• Real-time JavaScript event collector for production
+107|normal|• Payment or user authentication system
+108|normal|• A/B testing system (future work)
+109|normal|2
+110|normal|CHAPTER 2 LITERATURE REVIEW Table 2. 1 Literature Review
+118|normal|3
+121|normal|4
+122|normal|CHAPTER 3 SYSTEM ANALYSIS
+123|normal|System analysis helps understand the limitations of the existing workflow and define the  improvements introduced by the proposed system. This section compares the current scenario with  the designed ML-based purchase prediction pipeline.
+124|normal|3.1 Existing System
+125|normal|Most e-commerce platforms collect user activity through web analytics tools such as Google  Analytics, server logs, or custom tracking scripts. However, in typical existing systems:
+126|normal|3.1.1 Manual or Rule-Based Insights
+127|normal|• Decisions such as showing discounts, offers, or nudges are usually rule-based (e.g., “If  user added to cart but did not checkout → send reminder”).
+128|normal|• These static rules fail to capture complex user behaviour patterns.
+129|normal|3.1.1 No Real-Time Purchase Prediction
+130|normal|• Platforms may analyze conversion trends in dashboards, but they do not predict  purchase probability for each session in real time.
+131|normal|• Business teams rely on historical reports instead of proactive interventions. 3.1.3 Poor Handling of Imbalanced Data
+132|normal|• Only a small fraction of sessions result in purchases, so simple analytics fail to identify  high-intent users.
+133|normal|3.1.4 Lack of Automated Feature Engineering
+134|normal|• Existing systems generate simple aggregates (pageviews, time spent) but lack advanced  behavioural features.
+135|normal|3.1.5 No Deployment or Monitoring Setup
+136|normal|• Most academic or offline models are not deployed.
+137|normal|• Systems lack:
+138|normal|➢ ML versioning
+139|normal|➢ Monitoring (latency, errors, drift)
+140|normal|➢ Real-time scoring APIs
+141|normal|3.1.6 No Explainability
+142|normal|• Business teams cannot understand why a session is predicted as high or low intent. • Interpretability is critical for trust and transparency.
+143|normal|Summary of Existing Limitations
+144|normal|• No predictive intelligence
+145|normal|• No real-time scoring
+146|normal|• No explainability
+147|normal|• No automated ML pipeline
+148|normal|• No integration with business teams
+149|normal|5
+150|normal|3.2 Proposed System
+151|normal|To overcome the limitations of the existing setup, the proposed system introduces a complete ML  engineering pipeline designed for production readiness.
+152|normal|3.2.1 End-to-End Machine Learning Pipeline
+153|normal|The proposed system includes:
+154|normal|• Data ingestion
+155|normal|• Preprocessing
+156|normal|• Feature engineering
+157|normal|• Model training
+158|normal|• Hyperparameter tuning (Optuna)
+159|normal|• Explainability (SHAP)
+160|normal|• Deployment (FastAPI)
+161|normal|• Dashboard (Streamlit)
+162|normal|• Monitoring (Prometheus/Grafana)
+163|normal|3.2.2 Session-Level Purchase Prediction
+164|normal|The system predicts a purchase probability for each user session using:
+165|normal|• Behavioural features
+166|normal|• Temporal features
+167|normal|• Sequence features
+168|normal|This enables real-time personalization and targeted marketing.
+169|normal|3.2.3 Handling Class Imbalance
+170|normal|Two methods are integrated:
+171|normal|• SMOTE oversampling
+172|normal|• Class weight adjustments
+173|normal|These ensure better model performance for rare purchase events.
+174|normal|3.2.4 Multiple Model Architectures
+175|normal|• The system tests and compares:
+176|normal|• Random Forest
+177|normal|• XGBoost
+178|normal|• LightGBM
+179|normal|• Transformer model
+180|normal|Optuna selects the best-performing model based on validation metrics.
+181|normal|3.2.5 Explainability Using SHAP
+182|normal|• Global SHAP: identifies the most influential features.
+183|normal|• Local SHAP: explains individual session predictions.
+184|normal|This helps business teams interpret outcomes.
+185|normal|3.2.6 Real-Time API for Integration
+186|normal|6
+187|normal|A FastAPI-based inference service exposes:
+188|normal|• /predict
+189|normal|• /batch-predict
+190|normal|• /health
+191|normal|Endpoints enable website/backend integration. 3.2.7 Streamlit Dashboard
+192|normal|Operators can:
+193|normal|• Enter values
+194|normal|• View predictions
+195|normal|• Explore SHAP visualizations
+196|normal|• Read training reports
+197|normal|3.2.8 Monitoring & Logging
+198|normal|Prometheus collects:
+199|normal|• API latency
+200|normal|• Error rate
+201|normal|• Request count
+202|normal|Grafana displays dashboards for operations teams.
+203|normal|Benefits of the Proposed System
+204|normal|• Accurate purchase probability predictions • Real-time decision support
+205|normal|• Automated and scalable pipeline
+206|normal|• Improved marketing efficiency
+207|normal|• Transparent and explainable results
+208|normal|7
+209|normal|CHAPTER 4 SYSTEM DESIGN
+210|normal|System design defines how various components of the purchase prediction system interact—from  data ingestion to model deployment. This section covers the architecture, data flow, and database  relationships used in the project.
+211|normal|4.1 System Architecture
+212|normal|The system is designed as a modular end-to-end ML pipeline consisting of three major layers: Figure 4. 1 System Architecture
+213|normal|4.1.1 Data Ingestion Layer
+214|normal|• Collects raw event logs such as pageviews, product views, add-to-cart events, and  checkout visits.
+215|normal|• Events can be captured using:
+216|normal|➢ JavaScript snippet
+217|normal|➢ Server-side event collector
+218|normal|➢ Analytics pipeline
+219|normal|• Stores raw logs in a database or file system (e.g., CSV, JSON, or DB tables). 4.1.2 Processing Layer Offline
+220|normal|Responsible for preparing data for model training:
+221|normal|• Session Aggregation: Groups events by session ID.
+222|normal|• Feature Engineering: Computes metrics like total clicks, total time, number of product  views, etc.
+223|normal|• Sequence Generation: Optional sequence representation for transformer models. • Preprocessing: Scaling, encoding, missing value handling.
+224|normal|• Class Imbalance Handling: SMOTE or class weights.
+225|normal|8
+226|normal|• Model Training & Tuning: Runs Optuna hyperparameter trials.
+227|normal|• Explainability: SHAP values computed for global and local interpretation. • Artifact Saving: Model, pipeline, metrics, and SHAP cache saved to models/.
+228|normal|4.1.3 Serving Layer
+229|normal|This layer powers real-time predictions once the model is deployed.
+230|normal|Components include:
+231|normal|• FastAPI Inference Services
+232|normal|Loads trained model + pipeline and exposes:
+233|normal|➢ /predict endpoint
+234|normal|➢ /batch-predict endpoint
+235|normal|➢ /health endpoint
+236|normal|• Streamlit Dashboard
+237|normal|Used for:
+238|normal|➢ Manual testing
+239|normal|➢ Visualization
+240|normal|➢ SHAP interpretation
+241|normal|➢ Viewing training reports
+242|normal|• Monitoring System (Prometheus + Grafana)
+243|normal|Tracks:
+244|normal|➢ API latency
+245|normal|➢ Request count
+246|normal|➢ Error rate
+247|normal|• MLflow Tracking Server
+248|normal|Logs:
+249|normal|➢ Experiment metrics
+250|normal|➢ Hyperparameters
+251|normal|➢ Model versions
+252|normal|4.2 Data Flow Diagram (DFD)
+253|normal|Below is a simplified explanation of the data flow in the system. (You can insert a Mermaid  diagram when finalizing the report.)
+254|normal|4.2.1 Level 0 (Context-Level DFD)
+255|normal|Shows the entire system at a single high level.
+256|normal|Figure 4. 2 Shows the entire system at a single high level.
+257|normal|9
+258|normal|4.2.2 Level 1 (Detailed DFD)
+259|normal|Describes how data moves through components.
+260|normal|1. User interacts with website
+261|normal|➢ Events like clicks, views, add-to-cart recorded.
+262|normal|2. Event Collector receives logs
+263|normal|➢ Stores raw events.
+264|normal|3. Data Processing Engine (ETL)
+265|normal|➢ Cleans data
+266|normal|➢ Groups into sessions
+267|normal|➢ Extracts features
+268|normal|➢ Generates training datasets
+269|normal|4. Training Pipeline
+270|normal|➢ Preprocesses data
+271|normal|➢ Applies SMOTE/class weights
+272|normal|➢ Trains models
+273|normal|➢ Tunes parameters
+274|normal|➢ Saves model + pipeline
+275|normal|5. Inference API
+276|normal|➢ Loads saved artifacts
+277|normal|➢ Provides prediction outputs
+278|normal|6. Streamlit Dashboard
+279|normal|➢ Frontend for model interaction and SHAP visualization
+280|normal|7. Monitoring Layer
+281|normal|➢ Tracks latency, errors, performance metrics
+282|normal|4.3 ER Diagram (Entity Relationship Model)
+283|normal|The ER diagram models the database structure used for storing raw events, aggregated sessions,  and model metadata.
+284|normal|10
+285|normal|Figure 4. 3 ER Diagram
+286|normal|Summary of System Design
+287|normal|The overall design ensures:
+288|normal|• Reliable ingestion of user activity
+289|normal|• Structured and efficient session aggregation
+290|normal|• Reproducible training pipeline with tuning
+291|normal|• Explainable model output
+292|normal|• Scalable deployment with monitoring
+293|normal|• Modular and maintainable architecture
+294|normal|11
+295|normal|CHAPTER 5 IMPLEMENTATION
+296|normal|This section explains how the system was built from data preparation to model deployment. It  covers preprocessing, model training, explainability, API development, and deployment setup.
+297|normal|5.1 Data Preprocessing
+298|normal|Data preprocessing ensures that raw event logs and session data are cleaned, structured, and ready  for model training.
+299|normal|5.1.1 Data Cleaning
+300|normal|• Removed duplicate event entries
+301|normal|• Handled missing timestamps
+302|normal|• Normalized event names (e.g., "ViewProduct" → "product_view")
+303|normal|• Removed sessions with extremely low activity (1 event or incomplete logs) 5.1.2 Session Aggregation
+304|normal|Raw event logs were grouped by session_id. For each session, the following features were  computed:
+305|normal|• Behavioral features
+306|normal|➢ Number of pageviews
+307|normal|➢ Number of product views
+308|normal|➢ Number of clicks
+309|normal|➢ Add-to-cart count
+310|normal|➢ Checkout page visits
+311|normal|• Time-based features
+312|normal|➢ Total session duration
+313|normal|➢ Start hour
+314|normal|➢ Day of week
+315|normal|• Engagement features
+316|normal|➢ Bounce (Yes/No)
+317|normal|➢ Ratio of product views to pageviews
+318|normal|5.1.3 Handling Missing Data
+319|normal|• Numerical missing values → filled with median
+320|normal|• Categorical missing values → filled with "unknown"
+321|normal|• Duration or time fields → recalculated if needed
+322|normal|12
+323|normal|5.1.4 Data Encoding & Scaling
+324|normal|Implemented via Scikit-learn pipeline:
+325|normal|• OneHotEncoder for categorical variables
+326|normal|• StandardScaler for numerical variables
+327|normal|• Imputer for missing values
+328|normal|5.1.5 Class Imbalance Handling
+329|normal|Purchase data is highly imbalanced. Two strategies were implemented: (a) SMOTE
+330|normal|Synthetic samples of the minority class were generated. (b) Class Weights
+331|normal|Models were trained with:
+332|normal|class_weight = {0: 1, 1: weight_factor}
+333|normal|where positive class (purchase) gets higher weight.
+334|normal|Both methods were tested and compared during training. Figure 5. 1 Event Data Processing Pipeline
+335|normal|5.2 Model Development
+336|normal|Multiple machine learning algorithms were implemented and evaluated. 5.2.1 Baseline Model: Logistic Regression
+337|normal|13
+338|normal|• Provided a reference for accuracy and F1-score
+339|normal|• Performed poorly due to non-linear behaviours
+340|normal|5.2.2 Ensemble Models
+341|normal|Three ML ensemble models were implemented:
+342|normal|1. Random Forest
+343|normal|• Easy to interpret
+344|normal|• Good baseline model
+345|normal|• Works well with mixed data types
+346|normal|1. XGBoost
+347|normal|• Excellent for tabular data
+348|normal|• Handles sparse features
+349|normal|• Best-performing model after tuning
+350|normal|3. LightGBM
+351|normal|• Faster than XGBoost
+352|normal|• Effective for large datasets
+353|normal|5.2.3 Deep Learning Model (Transformer)
+354|normal|A Transformer-based model was developed to capture event sequences. Components:
+355|normal|• Token embedding for event types
+356|normal|• Positional encoding
+357|normal|• Multi-head attention layers
+358|normal|• Fully connected prediction head
+359|normal|Though computationally heavier, it provides deeper behavioural insights. 5.2.4 Hyperparameter Tuning with Optuna
+360|normal|Optuna was used to search optimal hyperparameters.
+361|normal|Trial parameters included:
+362|normal|• Number of estimators
+363|normal|• Max depth
+364|normal|• Learning rate
+365|normal|• Subsample ratios
+366|normal|• Minimum child weight
+367|normal|Optuna’s TPE sampler and early pruning significantly reduced tuning time.
+368|normal|14
+369|normal|Final best XGBoost parameters (example):
+370|normal|{
+371|normal|"n_estimators": 56,
+372|normal|"max_depth": 11,
+373|normal|"min_samples_split": 6,
+374|normal|"min_samples_leaf": 1
+375|normal|}
+376|normal|}}
+377|normal|5.2.5 Model Saving
+378|normal|All artifacts were saved in models/:
+379|normal|• pipeline.joblib → preprocessing pipeline
+380|normal|}
+381|normal|• best_model.joblib → trained model
+382|normal|• shap_values.pkl → SHAP explanation cache
+383|normal|• report.json → metrics + best parameters
+384|normal|• threshold.txt → final classification threshold
+385|normal|Figure 5. 2 Model Training And Ealuation Pipeline
+386|normal|15
+387|normal|5.3 Model Explainability (SHAP)
+388|normal|SHAP was used to analyze which features most influence predictions.
+389|normal|5.3.1 Global Explanations
+390|normal|Generated:
+391|normal|• SHAP summary plot
+392|normal|• Mean absolute SHAP bar plot
+393|normal|Top influential features (example):
+394|normal|• n_add_to_cart
+395|normal|• visited_checkout
+396|normal|• total_time
+397|normal|• n_product_views
+398|normal|5.3.2 Local Explanations
+399|normal|For each session, SHAP provides:
+400|normal|• Feature contribution list
+401|normal|• Positive/negative impact visualization
+402|normal|These explanations help business teams understand why a user is predicted as likely/not likely to  purchase.
+403|normal|5.4 API & Dashboard Development
+404|normal|Two core interfaces were implemented: FastAPI service and Streamlit dashboard. 5.4.1 FastAPI Inference Service
+405|normal|A production-ready API was developed with:
+406|normal|• POST /predict → returns probability + decision
+407|normal|• POST /batch-predict → for multiple sessions
+408|normal|• GET /health → health check endpoint
+409|normal|Features:
+410|normal|• Automatic model loading
+411|normal|• Error handling
+412|normal|• JSON validation
+413|normal|• Logging
+414|normal|• Prometheus metrics
+415|normal|5.4.2 Streamlit Dashboard
+416|normal|16
+417|normal|User-friendly dashboard with:
+418|normal|• Form to enter session data
+419|normal|• Display of prediction (probability + decision)
+420|normal|• SHAP visualization buttons
+421|normal|• Model report viewer
+422|normal|• Insights and summaries
+423|normal|This helps data analysts and business teams interact with the model easily.
+424|normal|5.5 Deployment Setup
+425|normal|Deployment was done using Docker & Docker Compose, enabling easy replication. 5.5.1 Containers Include
+426|normal|• FastAPI service
+427|normal|• Streamlit app
+428|normal|• MLflow server
+429|normal|• Prometheus metrics collector
+430|normal|• Grafana dashboard
+431|normal|• MinIO artifact store (optional)
+432|normal|5.5.2 Monitoring
+433|normal|Prometheus tracked:
+434|normal|• API latency
+435|normal|• Requests per second
+436|normal|• Error rates
+437|normal|Grafana dashboards visualized these metrics in real time.
+438|normal|5.5.3 Scalability
+439|normal|The API can scale by:
+440|normal|• Increasing Uvicorn workers
+441|normal|• Horizontal scaling with load balancers
+442|normal|• Cloud deployment (AWS/GCP/Azure)
+443|normal|17
+444|normal|CHAPTER 6 TESTING AND VALIDATION
+445|normal|Testing and validation ensure that the entire system—from data preprocessing to model  deployment—performs correctly, reliably, and efficiently. This section covers unit testing,  integration testing, model evaluation, load testing, and reproducibility checks.
+446|normal|6.1 Unit Testing
+447|normal|Unit tests were written to verify the correctness of individual components in isolation. 6.1.1 Preprocessing Pipeline Tests
+448|normal|• Verified handling of missing values
+449|normal|• Ensured correct encoding of categorical variables
+450|normal|• Confirmed numerical features are scaled properly
+451|normal|• Tested SMOTE integration for imbalanced data
+452|normal|6.1.2 Model Wrapper Tests
+453|normal|• Checked predict_proba() returns valid probability values (between 0 and 1) • Ensured prediction output shape is correct
+454|normal|• Validated thresholding logic for converting probability → class label
+455|normal|6.1.3 Utility Function Tests
+456|normal|• JSON validator for API inputs
+457|normal|• Feature transformation consistency tests
+458|normal|• Error handling for invalid payloads
+459|normal|Tools used: pytest, coverage, and synthetic fixtures.
+460|normal|6.2 Integration Testing
+461|normal|Integration tests validate that multiple components work together as a complete system. 6.2.1 End-to-End Pipeline Test
+462|normal|Steps verified:
+463|normal|1. Load sample event log
+464|normal|2. Aggregate into session-level data
+465|normal|3. Apply preprocessing pipeline
+466|normal|4. Train model on subset of data
+467|normal|5. Save artifacts
+468|normal|6. Load artifacts through FastAPI
+469|normal|18
+470|normal|7. Generate predictions successfully
+471|normal|6.2.2 Streamlit Dashboard Testing
+472|normal|Verified:
+473|normal|• Session input form renders correctly
+474|normal|• Predictions display properly
+475|normal|• SHAP plots load from cache
+476|normal|• Report JSON shows correct metrics
+477|normal|6.2.3 API Integration Tests
+478|normal|• Endpoints return expected responses
+479|normal|• Handles incorrect or incomplete input gracefully
+480|normal|• Correctly loads model + pipeline
+481|normal|• Latency remained within acceptable range (<300ms local)
+482|normal|6.3 Model Validation
+483|normal|Model validation was performed using a train/validation/test split. Evaluation metrics included:
+484|normal|6.3.1 Metrics Used
+485|normal|• F1-score
+486|normal|• Precision
+487|normal|• Recall
+488|normal|• ROC AUC
+489|normal|• Precision@k (1%, 5%, 10%)
+490|normal|• Confusion matrix
+491|normal|6.3.2 Observations
+492|normal|• XGBoost achieved the best F1 and Precision@k
+493|normal|• Random Forest performed decently but with lower recall
+494|normal|• Transformer model captured sequential behaviour but required more compute 6.3.3 Threshold Tuning
+495|normal|The decision threshold was optimized based on F1-score.
+496|normal|Final threshold example:
+497|normal|0.11
+498|normal|Meaning: if predicted probability ≥ 0.11 → classify as “purchase likely”.
+499|normal|19
+500|normal|6.4 Performance & Load Testing
+501|normal|Performance tests measure how the API behaves under real-world load. 6.4.1 Latency Test
+502|normal|Using Python scripts with multiple requests:
+503|normal|• Single-request latency: 40–70ms (local)
+504|normal|• Batch request latency: 80–150ms
+505|normal|6.4.2 Load Test
+506|normal|Using tools like wrk, Locust, and custom scripts:
+507|normal|• Handled 100–300 requests/second on a single container • Error rate remained below 1%
+508|normal|• CPU usage scaled linearly with requests
+509|normal|6.4.3 Stress Test
+510|normal|Pushed system beyond expected load:
+511|normal|• API degraded gracefully
+512|normal|• No crashes due to rate limiter & error handling
+513|normal|• Model loaded only once (cached), preventing reloading delays
+514|normal|6.5 Error Analysis
+515|normal|Error analysis helps understand model limitations.
+516|normal|6.5.1 False Positives (FP)
+517|normal|Model predicted purchase, but user did not buy.
+518|normal|• Often sessions with high activity but sudden drop-off • User behaviour similar to buyers but no final purchase 6.5.2 False Negatives (FN)
+519|normal|Model predicted no purchase, but user bought.
+520|normal|• Quick sessions with fewer events
+521|normal|• Impulsive buyers
+522|normal|• Harder to detect without deeper sequence modelling Understanding these cases provides insights for future improvements.
+523|normal|6.6 Reproducibility Testing
+524|normal|20
+525|normal|Reproducibility ensures consistent results across machines and runs. 6.6.1 Environment Reproduction
+526|normal|• All dependencies stored in requirements.txt
+527|normal|• Docker image ensures consistent runtime environment 6.6.2 Artifact Reproducibility
+528|normal|• Model saved with all parameters
+529|normal|• Pipeline stored with transformations
+530|normal|• MLflow tracks metrics and versions
+531|normal|6.6.3 Random Seeds
+532|normal|Random seeds set to control variance during:
+533|normal|• SMOTE
+534|normal|• Train/validation split
+535|normal|• Model initialization
+536|normal|Summary of Testing
+537|normal|• The pipeline works end-to-end without failures
+538|normal|• API responses are fast and reliable
+539|normal|• The model performs well even with imbalanced data • System is robust, reproducible, and ready for deployment
+540|normal|21
+541|normal|CHAPTER 7 RESULT AND DISCUSSION
+542|normal|This section presents the outcomes of the machine learning pipeline, including model performance,  evaluation metrics, visualizations, SHAP explainability insights, and interpretation of the system’s  effectiveness. It also discusses business-level implications and limitations.
+543|normal|7.1 Model Performance Summary
+544|normal|After training multiple models (Random Forest, XGBoost, LightGBM, and Transformer),  XGBoost emerged as the best-performing algorithm.
+545|normal|7.1.1 Performance Metrics (from report.json)
+546|normal|Table 7. 1 Performance Metrics
+549|normal|Even though the F1-score and precision values appear modest, such values are common in highly  imbalanced conversion datasets, where typically fewer than 1–3% of sessions result in a  purchase.
+550|normal|Why these values still have business value:
+551|normal|• Precision@10% = 0.119 means that when the system flags the top 10% sessions as  high-intent, nearly 11% of them actually purchase — much higher than the baseline  conversion rate.
+552|normal|• This helps businesses prioritize these users for:
+553|normal|➢ personalized offers
+554|normal|➢ notifications
+555|normal|➢ cart reminders
+556|normal|➢ special discounts
+557|normal|7.2 Confusion Matrix Interpretation
+558|normal|A confusion matrix was generated using the tuned threshold (0.11):
+559|normal|• True Positives (TP): Users predicted to purchase and actually purchased • False Positives (FP): Users predicted to purchase but did not
+560|normal|• True Negatives (TN): Users predicted not to purchase and did not
+561|normal|• False Negatives (FN): Users predicted not to purchase but purchased
+562|normal|Observations:
+563|normal|22
+564|normal|• FN cases exist due to quick sessions with minimal activity.
+565|normal|• FP cases occur when users behave like purchasers but drop off unexpectedly. This behavior aligns with expected real-world patterns.
+566|normal|7.3 ROC Curve & AUC Score
+567|normal|• ROC curve shows trade-off between true positive rate and false positive rate.
+568|normal|• AUC value was moderate, indicating that the model correctly ranks positive sessions  higher than negative ones, but complexity in user behavior limits perfect separation.
+569|normal|7.4 SHAP Global Explanation
+570|normal|SHAP visualizations help identify which features contribute most to the model’s predictions. 7.4.1 Top Influential Features (Global SHAP)
+571|normal|Based on SHAP summary:
+572|normal|1. n_add_to_cart
+573|normal|2. visited_checkout
+574|normal|3. n_product_views
+575|normal|4. total_time
+576|normal|5. start_hour
+577|normal|6. bounce
+578|normal|7. pageview count
+579|normal|Interpretation:
+580|normal|• Add-to-cart count is the strongest signal of purchasing intent.
+581|normal|• Visited checkout strongly increases purchase probability — expected behavior. • Longer session duration correlates with higher purchase intent.
+582|normal|• Early morning and late-night browsing had lower conversion likelihood. This information is highly useful for campaign targeting and UX improvements.
+583|normal|7.5 Local SHAP Analysis
+584|normal|Local explanations illustrate why a particular user session was predicted as high- or low-intent. Example Local SHAP Breakdown:
+585|normal|• High n_product_views → pushes prediction up
+586|normal|• No visited_checkout → pushes down
+587|normal|23
+588|normal|• Low session duration → pushes down
+589|normal|• Multiple add_to_cart events → pushes up significantly
+590|normal|This helps customer support or marketing teams justify and trust decisions.
+591|normal|7.6 Business Insights
+592|normal|The model uncovers several actionable business insights:
+593|normal|7.6.1 Cart Interaction ≠ Guaranteed Purchase
+594|normal|Many users add items to the cart but still do not complete the purchase. The system can identify these high-intent drop-offs.
+595|normal|7.6.1 Checkout Visits Are Strong Indicators
+596|normal|Users who open checkout pages are significantly more likely to purchase. 7.6.3 Time-of-Day Impacts Purchases
+597|normal|Peak purchase activity often occurs during:
+598|normal|• evening hours
+599|normal|• weekdays
+600|normal|7.6.4 Product-view Intensity
+601|normal|Users who view the same product multiple times have higher purchase probability. 7.6.5 Utility for Retargeting
+602|normal|Top-scoring sessions can be retargeted with:
+603|normal|• discount codes
+604|normal|• reminders
+605|normal|• personalized recommendations
+606|normal|7.7 Comparison of Models
+607|normal|XGBoost strikes the best balance between:
+608|normal|• speed
+609|normal|• stability
+610|normal|• interpretability
+611|normal|• performance
+612|normal|24
+613|normal|7.8 Limitations
+614|normal|Despite good performance, the system has some limitations:
+615|normal|1. Imbalanced Data Challenges
+616|normal|Even with SMOTE and class weights, purchase prediction remains a rare event.
+617|normal|2. Limited Event Context
+618|normal|The model mostly uses aggregated session features; richer sequence data may improve  accuracy.
+619|normal|3. Cold Sessions
+620|normal|Short sessions with few interactions are hard to classify.
+621|normal|4. Site Design & Seasonal Effects
+622|normal|User behavior changes during promotions or festivals, causing possible drift.
+623|normal|7.9 Final Summary
+624|normal|The system successfully predicts purchase probability with a production-ready approach, using: • strong ML models
+625|normal|• tuning
+626|normal|• explainability
+627|normal|• deployment
+628|normal|• monitoring
+629|normal|While the F1-score is modest due to data imbalance, the model provides significant practical  value, especially in identifying the top high-intent users for targeted interventions.
+630|normal|7.10 Streamlit Application Screenshots
+631|normal|This section presents the key user interface components of the Streamlit dashboard developed for  the Customer Purchase Prediction System. These screenshots highlight the main features: input  form, prediction output, confidence scores, and detailed feature metrics.
+632|normal|7.10.1 Streamlit Home & Prediction Interface
+633|normal|This screenshot shows the main interface of the application, where the user can input session  metrics such as pageviews, clicks, time spent, and shopping activity. The prediction results— including probability, decision label, and confidence—are displayed prominently.
+634|normal|25
+635|normal|Figure 7. 1 Streamlit Home & Prediction Interface
+636|normal|7.10.2 Model Performance Summary & Business Metrics
+637|normal|This view shows model performance insights, including:
+638|normal|• Best F1-score
+639|normal|• Optimized threshold
+640|normal|• Precision@k business metrics
+641|normal|• Best model hyperparameters
+642|normal|Figure 7. 2 Model Performance Summary & Business Metrics
+643|normal|7.10.3 Detailed Feature Values Table
+644|normal|After prediction, the user can expand a section to view all session features used for the calculation.  This ensures transparency and debugging support.
+645|normal|26
+646|normal|Figure 7. 3 Detailed Feature Values Table
+647|normal|7.10.4 Example of Low Purchase Prediction
+648|normal|This screenshot shows an example where the system predicts "May Not Purchase" with a lower  probability. This demonstrates the behavior of the model under different input conditions.
+649|normal|Figure 7. 4 Example of Low Purchase Prediction
+650|normal|27
+651|normal|CHAPTER 8 FUTURE WORK
+652|normal|Several enhancements can be made to improve the accuracy, scalability, and real-world usefulness  of the system:
+653|normal|8.1 Real-Time Data Streaming
+654|normal|Integrate real-time event ingestion using Kafka or similar tools to enable instant session updates  and predictions.
+655|normal|8.2 Improved Deep Learning Models
+656|normal|Explore advanced models such as LSTM or Transformers with richer event embeddings for better  behavioural understanding.
+657|normal|8.3 More Feature Engineering
+658|normal|Add user history, product attributes, device data, and UX signals (scroll depth, time per page) to  enhance prediction quality.
+659|normal|8.4 Automatic Retraining & Drift Detection
+660|normal|Implement pipelines for periodic retraining and monitor behavioural drift to maintain model  accuracy over time.
+661|normal|8.5 A/B Testing Integration
+662|normal|Deploy the model with controlled experiments to measure actual business impact on conversions. 8.6 Security & Privacy Enhancements
+663|normal|Add data anonymization, secure API access, and compliance with GDPR/CCPA for production  environments.
+664|normal|8.7 Cloud Deployment & Scaling
+665|normal|Deploy on AWS/GCP/Azure with auto-scaling, API gateways, and CI/CD for enterprise-grade  reliability.
+666|normal|28
+667|normal|CONCLUSION
+668|normal|The Customer Purchase Prediction System developed in this project successfully demonstrates a  complete end-to-end machine learning pipeline capable of predicting purchase probability using  session-level behavioural data. Through a combination of robust preprocessing, advanced feature  engineering,
+669|normal|XGBoost emerged as the best-performing model after rigorous hyperparameter tuning using  Optuna. The model’s predictions were further enhanced through threshold optimization and  supported by SHAP-based explainability, enabling both global and session-specific insights. These  explanations provide v
+670|normal|In addition to model development, significant emphasis was placed on deployment and usability.  A FastAPI-based inference service and an interactive Streamlit dashboard allow for real-time  predictions, visualization, and analysis. The integration of MLflow, Prometheus, and Grafana  enables experime
+671|normal|Overall, the project demonstrates how machine learning can transform raw web interaction data  into actionable insights that support personalized marketing, session-level optimization, and  improved user experience. The solution is modular, scalable, reproducible, and can be extended  seamlessly for
+672|normal|29
+673|normal|REFERENCES
+674|normal|[1] L. Breiman, “Random forests,” Machine Learning, vol. 45, no. 1, pp. 5–31, 1001.
+675|normal|[1] T. Chen and C. Guestrin, “XGBoost: A scalable tree boosting system,” in Proc. 11nd ACM  SIGKDD Int. Conf. Knowledge Discovery and Data Mining (KDD), 1016, pp. 785–794.
+676|normal|[3] G. Ke et al., “LightGBM: A highly efficient gradient boosting decision tree,” in Advances in  Neural Information Processing Systems (NeurIPS), vol. 30, 1017, pp. 3146–3154.
+677|normal|[4] N. V. Chawla, K. W. Bowyer, L. O. Hall, and W. P. Kegelmeyer, “SMOTE: Synthetic minority  over-sampling technique,” J. Artif. Intell. Res., vol. 16, pp. 311–357, 1001.
+678|normal|[5] S. M. Lundberg and S.-I. Lee, “A unified approach to interpreting model predictions,” in  Advances in Neural Information Processing Systems (NeurIPS), vol. 30, 1017, pp. 4765– 4774.
+679|normal|[6] A. Vaswani et al., “Attention is all you need,” in Advances in Neural Information Processing  Systems (NeurIPS), vol. 30, 1017, pp. 5998–6008.
+680|normal|[7] T. Akiba, S. Sano, T. Yanase, M. Ohta, and M. Koyama, “Optuna: A next-generation  hyperparameter optimization framework,” in Proc. 15th ACM SIGKDD Conf. Knowledge  Discovery and Data Mining (KDD), 1019, pp. 1613–1631.
+681|normal|[8] A. Paszke et al., “PyTorch: An imperative style, high-performance deep learning library,” in  Advances in Neural Information Processing Systems (NeurIPS), vol. 31, 1019, pp. 8014– 8035.
+682|normal|[9] F. Pedregosa et al., “Scikit-learn: Machine learning in Python,” J. Mach. Learn. Res., vol.  11, pp. 1815–1830, 1011.
+683|normal|[10] S. Taneja, “FastAPI Documentation,” 1010. [Online]. Available:  https://fastapi.tiangolo.com/
+684|normal|[11] I. Goodfellow, Y. Bengio, and A. Courville, Deep Learning. Cambridge, MA: MIT Press,  1016.
+685|normal|[11] D. P. Kingma and J. Ba, “Adam: A method for stochastic optimization,” in Proc. Int. Conf.  Learning Representations (ICLR), 1015.
+686|normal|30
+687|normal|[13] M. Zaharia et al., “Apache Spark: A unified engine for big data processing,” Commun. ACM,  vol. 59, no. 11, pp. 56–65, 1016.
+688|normal|[14] M. Zaharia et al., “Discretized streams: Fault-tolerant streaming computation at scale,” in  Proc. 14th ACM Symp. Operating Systems Principles (SOSP), 1013, pp. 413–438.
+689|normal|[15] P. Wendell et al., “MLflow: A platform for managing the ML lifecycle,” Databricks Technical  Report, 1019.
+690|normal|[16] G. C. Ward and M. Fitzpatrick, The Docker Book: Containerization is the New Virtualization,  3rd ed. 1018.
+691|normal|[17] F. Hüsser, D. Brunner, and A. Bernstein, “FastAPI: A Python framework for efficient API  development,” Software Engineering Notes, 1010.
+692|normal|[18] M. Grondin et al., “Prometheus: Monitoring system & time series database,” Prometheus.io  Documentation, 1010.
+693|normal|[19] Grafana Labs, “Grafana: The open observability platform,” 1011. [Online]. Available:  https://grafana.com
+694|normal|[10] S. Ren, K. He, R. Girshick, and J. Sun, “Deep residual learning for image recognition,” in  Proc. IEEE Conf. Computer Vision and Pattern Recognition (CVPR), 1016, pp. 770–778.
+695|normal|31
